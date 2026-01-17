@@ -1,0 +1,44 @@
+[project]
+name = "docu-buddy-backend"
+version = "0.1.0"
+description = "Backend for documentation assistant with RAG capabilities"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.23.0",
+    "openai>=1.3.0",
+    "langchain>=1.0.0",
+    "langchain-chroma>=1.0.0",
+    "chromadb>=1.3.6",
+    "langgraph>=1.0.0",
+    "httpx>=1.2.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.12.0",
+    "markdown>=3.5.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "python-multipart>=0.0.6",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=1.2.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+skip-string-normalization = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
