@@ -1,8 +1,48 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+from .core.config import settings
+from .routers import chat
+from .services.chat_service import ChatService
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize services on startup"""
+    # Initialize chat service (will trigger document indexing)
+    chat_service = ChatService()
+    app.state.chat_service = chat_service
+    yield
+    # Cleanup if needed
+
+
+app = FastAPI(
+    title=settings.app_name,
+    description="Backend for documentation assistant with RAG capabilities",
+    version="0.1.0",
+    lifespan=lifespan
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Frontend URLs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routers
+app.include_router(chat.router)
 
 
 @app.get("/")
 def read_root():
-    return {"message": "FastAPI + uv + uvicorn + gunicorn funcionando 🚀"}
+    return {"message": "DocuBuddy Backend API 🚀", "version": "0.1.0"}
+
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": settings.app_name}

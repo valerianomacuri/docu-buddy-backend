@@ -62,7 +62,7 @@ class DocumentScraper:
             
         except Exception as e:
             print(f"Error parsing {file_path}: {e}")
-            return None
+            return None # pyright: ignore[reportReturnType]
     
     def _extract_title(self, content: str, file_path: Path) -> str:
         """Extract title from markdown content or use filename"""
