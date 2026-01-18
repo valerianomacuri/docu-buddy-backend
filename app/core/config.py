@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -9,6 +8,10 @@ class Settings(BaseSettings):
     # API Configuration
     api_host: str = "0.0.0.0"
     api_port: int = 8000
+
+    # MongoDB Configuration
+    mongodb_url: str = "mongodb://docubuddy:docubuddy123@localhost:27017/docubuddy_db?authSource=admin"
+    mongodb_db_name: str = "docubuddy_db"
     
     # OpenAI Configuration
     openai_api_key: str
