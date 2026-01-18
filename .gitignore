@@ -12,3 +12,6 @@ wheels/
 # DBs
 /chroma_db
 /memory
+
+# Env Vars
+.env
