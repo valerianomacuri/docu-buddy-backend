@@ -45,7 +45,6 @@ class MongoConversationMemory:
         conversation = Conversation(
             conversation_id=conversation_id,
             user_id=user_id,
-            user=None,
             title=title or f"Conversación {datetime.now().strftime('%Y-%m-%d %H:%M')}",
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),

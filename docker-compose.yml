@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: docubuddy
+      MONGO_INITDB_ROOT_PASSWORD: docubuddy123
+      MONGO_INITDB_DATABASE: docubuddy_db
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
   chromadb:
     image: chromadb/chroma:latest
     ports:
@@ -15,6 +33,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
 volumes:
+  mongodb_data:
+    driver: local
   chroma_data:
+    driver: local
