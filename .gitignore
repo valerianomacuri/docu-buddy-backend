@@ -10,5 +10,5 @@ wheels/
 .venv
 
 # DBs
-chroma_db/
-memory/
+/chroma_db
+/memory
