@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
         await init_beanie(
             database=client[settings.mongodb_db_name],
             document_models=[User, Conversation, Message],
-            allow_index_dropping=True
+            allow_index_dropping=True,
         )
         print("✅ MongoDB initialized successfully")
     except Exception as e:

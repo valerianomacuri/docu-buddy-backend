@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from beanie import SortDirection
 
@@ -36,7 +36,7 @@ class MongoConversationMemory:
         return user
 
     async def create_conversation(
-        self, user_id: str = "default-user", title: Optional[str] = None
+        self, user_id: str = "default-user", title: str | None = None
     ) -> str:
         """Create a new conversation and return its ID"""
         user = await self.get_or_create_user(user_id)
@@ -62,7 +62,7 @@ class MongoConversationMemory:
         logger.info(f"Created new conversation {conversation_id} for user {user_id}")
         return conversation_id
 
-    async def get_conversation(self, conversation_id: str) -> Optional[Conversation]:
+    async def get_conversation(self, conversation_id: str) -> Conversation | None:
         """Get a conversation by ID"""
         conversation = await Conversation.find_one(
             Conversation.conversation_id == conversation_id
@@ -72,16 +72,18 @@ class MongoConversationMemory:
 
     async def get_user_conversations(
         self, user_id: str = "default-user", limit: int = 50
-    ) -> List[Conversation]:
+    ) -> list[Conversation]:
         """Get all conversations for a user"""
-        conversations = await Conversation.find(
-            Conversation.user_id == user_id
-        ).sort([("updated_at", SortDirection.DESCENDING)]).to_list()
+        conversations = (
+            await Conversation.find(Conversation.user_id == user_id)
+            .sort([("updated_at", SortDirection.DESCENDING)])
+            .to_list()
+        )
         return conversations
 
     async def get_latest_conversation(
         self, user_id: str = "default-user"
-    ) -> Optional[Conversation]:
+    ) -> Conversation | None:
         """Get the most recent conversation for a user"""
         conversation = await (
             Conversation.find(Conversation.user_id == user_id)
@@ -95,8 +97,8 @@ class MongoConversationMemory:
         conversation_id: str,
         role: UserRole,
         content: str,
-        sources: Optional[List[DocumentSource]] = None,
-    ) -> Optional[Message]:
+        sources: list[DocumentSource] | None = None,
+    ) -> Message | None:
         """Add a message to a conversation"""
         conversation = await self.get_conversation(conversation_id)
         if not conversation:
@@ -134,7 +136,7 @@ class MongoConversationMemory:
 
     async def get_recent_messages(
         self, conversation_id: str, limit: int = 10
-    ) -> List[Message]:
+    ) -> list[Message]:
         """Get recent messages from a conversation"""
         conversation = await self.get_conversation(conversation_id)
         if not conversation or not conversation.messages:
@@ -199,7 +201,7 @@ class MongoConversationMemory:
         except Exception as e:
             logger.error(f"Error in cleanup: {e}")
 
-    async def get_all_conversations(self) -> List[Conversation]:
+    async def get_all_conversations(self) -> list[Conversation]:
         """Get all conversations (for admin/stats purposes)"""
         conversations = await (
             Conversation.find()
@@ -211,7 +213,7 @@ class MongoConversationMemory:
 
     async def get_conversation_stats(
         self, user_id: str = "default-user"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get statistics for a user"""
         try:
             conversations = await Conversation.find(

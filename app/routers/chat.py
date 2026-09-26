@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
 
 from ..models.schemas import ChatRequest, ChatResponse
 from ..services.chat_service import ChatService
-
 
 router = APIRouter(prefix="/api", tags=["chat"])
 chat_service = ChatService()

@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from beanie import Document, Indexed, Link
 from pydantic import Field
@@ -15,6 +15,7 @@ class UserRole(str, Enum):
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type, handler):
         from pydantic_core import core_schema
+
         # Le decimos a Pydantic que lo trate como un string
         return core_schema.str_schema()
 
@@ -30,9 +31,8 @@ class User(Document):
     user_id: Indexed(str, unique=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    conversations: List[Link["Conversation"]] = Field(default_factory=list)
-
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    conversations: list[Link["Conversation"]] = Field(default_factory=list)
 
 
 class Message(Document):
@@ -49,7 +49,7 @@ class Message(Document):
     role: UserRole
     content: str = Field(min_length=1, max_length=10000)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    sources: List[DocumentSource] = Field(default_factory=list)
+    sources: list[DocumentSource] = Field(default_factory=list)
 
 
 class Conversation(Document):
@@ -62,18 +62,18 @@ class Conversation(Document):
 
     conversation_id: Indexed(str, unique=True)
     user_id: Indexed(str)
-    title: Optional[str] = Field(None, max_length=200)
+    title: str | None = Field(None, max_length=200)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Embedded messages (for performance)
-    messages: List[Message] = Field(default_factory=list)
+    messages: list[Message] = Field(default_factory=list)
 
     async def add_message(
         self,
         role: UserRole,
         content: str,
-        sources: Optional[List[DocumentSource]] = None,
+        sources: list[DocumentSource] | None = None,
     ) -> Message:
         """Add a message to this conversation"""
         message = Message(role=role, content=content, sources=sources or [])
@@ -89,14 +89,14 @@ class Conversation(Document):
 
         return message
 
-    async def get_messages(self, limit: Optional[int] = None) -> List[Message]:
+    async def get_messages(self, limit: int | None = None) -> list[Message]:
         """Get messages from this conversation"""
         messages = self.messages
         if limit:
             messages = messages[-limit:]
         return messages
 
-    def to_dict_response(self) -> Dict[str, Any]:
+    def to_dict_response(self) -> dict[str, Any]:
         """Convert conversation to response dictionary"""
         return {
             "conversation_id": self.conversation_id,

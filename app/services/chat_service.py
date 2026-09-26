@@ -1,14 +1,15 @@
-from typing import List, Dict, Any, Optional
 import logging
+from typing import Any
+
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from pydantic import SecretStr
 
 from ..core.config import settings
 from ..memory.mongo_memory import MongoConversationMemory
-from ..retrieval.retrieval_service import RetrievalService
-from ..models.schemas import DocumentSource
 from ..models.mongodb import UserRole
+from ..models.schemas import DocumentSource
+from ..retrieval.retrieval_service import RetrievalService
 
 
 class ChatService:
@@ -37,9 +38,9 @@ Directrices:
     async def chat(
         self,
         message: str,
-        conversation_id: Optional[str] = None,
+        conversation_id: str | None = None,
         user_id: str = "default-user",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Process a chat message and return response"""
         try:
             # Get or create conversation
@@ -92,7 +93,7 @@ Directrices:
             }
 
     async def _generate_response(
-        self, question: str, context: str, history: List
+        self, question: str, context: str, history: list
     ) -> str:
         """Generate response using LLM"""
         try:
@@ -128,7 +129,7 @@ Directrices:
             logging.error(f"Error generating response: {e}")
             return "Lo siento, no pude generar una respuesta en este momento."
 
-    def _format_retrieved_docs(self, docs: List[Dict[str, Any]]) -> str:
+    def _format_retrieved_docs(self, docs: list[dict[str, Any]]) -> str:
         """Format retrieved documents for context"""
         if not docs:
             return "No se encontró documentación relevante para esta consulta."
@@ -148,7 +149,7 @@ Directrices:
 
         return "\n".join(context_parts)
 
-    def _format_history(self, messages: List) -> List[Dict[str, str]]:
+    def _format_history(self, messages: list) -> list[dict[str, str]]:
         """Format conversation history for LLM"""
         formatted = []
         for msg in messages[-10:]:  # Last 10 messages
@@ -156,8 +157,8 @@ Directrices:
         return formatted
 
     def _extract_sources(
-        self, retrieved_docs: List[Dict[str, Any]]
-    ) -> List[DocumentSource]:
+        self, retrieved_docs: list[dict[str, Any]]
+    ) -> list[DocumentSource]:
         """Extract source information from retrieved documents"""
         sources = []
         seen_sources = set()
@@ -182,7 +183,7 @@ Directrices:
 
         return sources
 
-    async def get_conversation_history(self, conversation_id: str) -> Dict[str, Any]:
+    async def get_conversation_history(self, conversation_id: str) -> dict[str, Any]:
         """Get conversation history"""
         conversation = await self.memory.get_conversation(conversation_id)
         if not conversation:
@@ -196,7 +197,7 @@ Directrices:
 
     async def get_user_conversations(
         self, user_id: str = "default-user"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get all conversations for a user"""
         conversations = await self.memory.get_user_conversations(user_id)
 
@@ -216,7 +217,7 @@ Directrices:
 
     async def get_latest_conversation(
         self, user_id: str = "default-user"
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get latest conversation for a user"""
         conversation = await self.memory.get_latest_conversation(user_id)
         if not conversation:
@@ -224,6 +225,6 @@ Directrices:
 
         return conversation.to_dict_response()
 
-    def get_retrieval_stats(self) -> Dict[str, Any]:
+    def get_retrieval_stats(self) -> dict[str, Any]:
         """Get retrieval statistics"""
         return self.retrieval.get_stats()
